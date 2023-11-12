@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "task": "Learn react",
+    "isCompleted": false
+  },
+  {
+    "id": 2,
+    "task": "Learn tailwind",
+    "isCompleted": true
+  },
+  {
+    "id": 3,
+    "task": "Learn html",
+    "isCompleted": false
+  },
+  {
+    "id": 4,
+    "task": "Learn css",
+    "isCompleted": false
+  },
+  {
+    "id": 5,
+    "task": "Learn javascript",
+    "isCompleted": false
+  }
+]
