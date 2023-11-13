@@ -1,66 +1,104 @@
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Todo from "./Todo";
+import { capitalizeFirstLetter, cn } from "./utils";
+import { FaRegCheckSquare, FaRegListAlt, FaStar } from "react-icons/fa";
 
 const sidebarFilters = [
   {
-    name: "All",
+    label: "all",
+    icon: <FaRegListAlt />,
   },
   {
-    name: "Pending",
+    label: "pending",
+    icon: <FaRegCheckSquare />,
   },
   {
-    name: "Completed",
+    label: "completed",
+    icon: <FaRegCheckSquare />,
+  },
+  {
+    label: "favorites",
+    icon: <FaStar />,
   },
 ];
 
 function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const filters = queryParams.get("filters");
+
+  useEffect(() => {
+    console.log("param:", filters);
+  }, [filters]);
+
+  const updateQueryParams = (newParams: Record<string, string | null>) => {
+    for (const [key, value] of Object.entries(newParams)) {
+      if (value === null) {
+        queryParams.delete(key);
+      } else {
+        queryParams.set(key, value);
+      }
+    }
+
+    navigate({ search: queryParams.toString() });
+  };
+
+  const handleFilter = (filter: string) => {
+    updateQueryParams({ filters: filter });
+  };
+
   return (
-    <div className="w-screen flex flex-col sm:flex-row">
-      <div className="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 h-screen w-full sm:w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">
+    <div className="w-screen flex flex-col md:flex-row">
+      <div className="relative flex flex-col bg-white text-gray-700 h-full md:h-screen w-full md:w-[20rem] p-4 shadow-xl shadow-blue-gray-900/5">
         <div className="mb-2 p-4">
           <h5 className="block antialiased tracking-normal text-3xl font-black leading-snug text-gray-900">
-            Todo App
+            MyTodo
           </h5>
         </div>
-        <nav className="flex flex-col gap-1 w-[240px] p-2 text-base font-normal text-gray-700">
-          {sidebarFilters.map((filter) => {
+        <nav className="flex flex-row md:flex-col gap-0 md:gap-1 w-[240px] p-2 text-base font-normal text-gray-700">
+          {sidebarFilters.map((filter, id) => {
             return (
               <div
+                onClick={() => handleFilter(filter.label)}
+                key={`filter-${id}`}
                 role="button"
-                className="flex items-center w-full p-3 rounded-lg text-start leading-tight transition-all hover:bg-blue-50 hover:bg-opacity-80 focus:bg-blue-50 focus:bg-opacity-80 active:bg-gray-50 active:bg-opacity-80 hover:text-blue-900 focus:text-blue-900 active:text-blue-900 outline-none"
+                className={cn(
+                  "flex flex-row items-center w-full p-3 rounded-lg text-start leading-tight transition-all hover:bg-blue-50 hover:bg-opacity-80 focus:bg-blue-50 focus:bg-opacity-80 hover:text-blue-900 outline-none",
+                  filters === filter.label ? "bg-blue-200" : "bg-white"
+                )}
               >
-                {filter.name}
+                <span className="text-xs">{filter.icon}</span>{" "}
+                <span className="ml-2">
+                  {capitalizeFirstLetter(filter.label)}
+                </span>
               </div>
             );
           })}
         </nav>
       </div>
-      <div className="w-full sm:w-[calc(100vw-50rem)] bg-white p-10">
-        <div className="mb-5">
-          <p className="text-3xl font-semibold">Welcome back!</p>
-        </div>
-        {/* <div className="flex flex-col">
-          <input
-            className="bg-transparent text-black border-2 border-solid my-2 h-10 rounded-lg rounded-tr-none rounded-br-none"
-            type="text"
-            value={newTodo}
-            onChange={(e) => setNewTodo(e.target.value)}
-          />
-          <button
-            className="-ml-1 bg-black text-white p-2 rounded-lg rounded-tl-none rounded-bl-none"
-            onClick={createTodo}
-          >
-            Add new todo
-          </button>
-        </div> */}
-        <button className="w-full flex bg-neutral-800 hover:bg-neutral-700 text-white text-left items-center py-3 px-10 shadow-sm border-[1px] rounded-xl">
-          <span className="text-2xl">+</span>{" "}
-          <span className="ml-3 font-bold">Add New Todo</span>
-        </button>
-        <Todo />
-      </div>
+      <div className="w-full flex flex-col xl:flex-row bg-white">
+        <div className="w-full p-10">
+          <div className="mb-5 hidden md:flex">
+            <p className="text-3xl font-semibold">Welcome back!</p>
+          </div>
 
-      <div className="w-full sm:w-[30rem] bg-white p-10">
-        <div className="flex flex-col">QWE</div>
+          <button className="w-full flex bg-transparent hover:bg-neutral-800 text-neutral-800 hover:text-white text-left items-center py-2 px-10 mb-2 shadow-md border-2 border-neutral-800 rounded-xl transition-all">
+            <span className="text-2xl">+</span>{" "}
+            <span className="ml-3 font-bold">Add New Todo</span>
+          </button>
+          <Todo />
+        </div>
+
+        <div className="w-full xl:w-[40rem] p-10 bg-neutral-50">
+          <div className="flex flex-col">
+            <div className="font-bold text-xl">Add New Todo</div>
+            <div>
+              <div className="flex flex-col"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
