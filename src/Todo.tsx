@@ -1,79 +1,39 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import todos from "./todos.json";
 import Checkbox from "./components/Checkbox";
 import { FaRegStar, FaStar, FaRegTrashAlt, FaRegEdit } from "react-icons/fa";
 import { capitalizeFirstLetter, cn } from "./utils";
 import Tooltip from "./components/Tooltip";
-
-export interface Todo {
-  id: string;
-  task: string;
-  isCompleted: boolean;
-  isFavorite: boolean;
-}
+import { useTodoContext } from "./TodoContext";
 
 function Todo() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const filters = queryParams.get("filters");
 
-  const [allTodos, setAllTodos] = useState<Todo[]>(todos);
-  const [newTodo, setNewTodo] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const toggleComplete = (id: string) => {
-    setAllTodos((prevAllTodos) =>
-      prevAllTodos.map((todo) =>
-        todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
-      )
-    );
-  };
-
-  const toggleFavorite = (id: string) => {
-    setAllTodos((prevAllTodos) =>
-      prevAllTodos.map((todo) =>
-        todo.id === id ? { ...todo, isFavorite: !todo.isFavorite } : todo
-      )
-    );
-  };
-
-  const deleteTodo = (id: string) => {
-    setIsLoading(true);
-    setAllTodos((prevAllTodos) =>
-      prevAllTodos.filter((todo) => todo.id !== id)
-    );
-    setIsLoading(false);
-  };
-
-  const createTodo = () => {
-    if (newTodo.trim() === "") return;
-
-    setIsLoading(true);
-    const newId = crypto.randomUUID();
-    const payload: Todo = {
-      id: newId,
-      task: newTodo,
-      isCompleted: false,
-      isFavorite: false,
-    };
-
-    setAllTodos([...allTodos, payload]);
-
-    setIsLoading(false);
-    setNewTodo("");
-  };
+  const {
+    isLoading,
+    allTodos,
+    toggleFavorite,
+    toggleComplete,
+    deleteTodo,
+    editTodo,
+  } = useTodoContext();
 
   const finalTodos = useMemo(
     () =>
       filters === "all" || !filters
         ? allTodos
-        : allTodos.filter((todo) => {
-            if (filters === "pending" && !todo.isCompleted) return true;
-            if (filters === "completed" && todo.isCompleted) return true;
-            if (filters === "favorites" && todo.isFavorite) return true;
-            return false;
-          }),
+        : allTodos
+            .sort((x, y) => {
+              return Number(x.isFavorite) - Number(y.isFavorite);
+            })
+            .filter((todo) => {
+              if (filters === "pending" && !todo.isCompleted) return true;
+              if (filters === "completed" && todo.isCompleted) return true;
+              if (filters === "favorites" && todo.isFavorite) return true;
+              return false;
+            }),
     [allTodos, filters]
   );
 
@@ -89,6 +49,9 @@ function Todo() {
           </div>
         </>
       ) : null}
+      {finalTodos.length === 0 && (
+        <div className="flex mt-2 font-bold">No data found!</div>
+      )}
       {finalTodos.map((todo) => {
         return (
           <div
@@ -111,7 +74,7 @@ function Todo() {
               </Tooltip>
               <Tooltip message="Edit">
                 <button
-                  onClick={() => deleteTodo(todo.id)}
+                  onClick={() => editTodo(todo.id)}
                   className="p-2 text-neutral-700 text-sm"
                 >
                   <FaRegEdit />
