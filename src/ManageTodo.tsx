@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TodoItem, useTodoContext } from "./TodoContext";
 import { cn } from "./utils";
+import toast from "react-hot-toast";
 
 const ManageTodo: React.FC = () => {
   const { todoAction, currentTodo, allTodos, setTodoAction, setAllTodos } =
@@ -27,6 +28,7 @@ const ManageTodo: React.FC = () => {
       });
       setTodoAction("");
       setTask("");
+      toast.success("Task successfully updated!");
 
       return;
     }
@@ -42,6 +44,7 @@ const ManageTodo: React.FC = () => {
     setAllTodos([...allTodos, payload]);
     setTodoAction("");
     setTask("");
+    toast.success("Task successfully added!");
   };
 
   return (

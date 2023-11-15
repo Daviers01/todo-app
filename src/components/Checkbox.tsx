@@ -1,10 +1,9 @@
-import { ChangeEvent } from "react";
 import { cn } from "../utils";
 
 interface CheckboxProps {
   isChecked: boolean;
   label: string;
-  onChange: (event: ChangeEvent<HTMLDivElement>) => void;
+  onChange: () => void;
 }
 
 const Checkbox: React.FC<CheckboxProps> = ({
